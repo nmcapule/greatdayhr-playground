@@ -1,3 +1,4 @@
+import "dotenv/config";
 import fetch from "node-fetch";
 
 const hasher = new (class {
@@ -170,11 +171,13 @@ function Zr(Pe, ie = !1) {
   );
 }
 
-const email = "PH0520";
-const password = "";
+const email = process.env.GDHR_USER;
+const password = process.env.GDHR_PASS;
 
 const H = "5unf15h" + email + "D4740N";
-const auth = "https://apigonbcv2c3.dataon.com/auth/login?";
+const authEndpoint = "https://apigonbcv2c3.dataon.com/auth/login?";
+const supervisorEndpoint =
+  "https://apigonbcv2c3.dataon.com/homeFeed/getSupervisor?";
 
 const payload = {
   username: email,
@@ -220,10 +223,18 @@ const payload = {
   console.log(Zr(Nt));
   console.log(headers);
 
-  const response = await fetch(auth, {
+  const authResponse = await fetch(authEndpoint, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: headers,
   });
-  console.log(await response.json());
+  const auth = await authResponse.json();
+  const token = auth["id"];
+
+  const supervisorResponse = await fetch(supervisorEndpoint, {
+    headers: {
+      Authorization: token,
+    },
+  });
+  console.log(await supervisorResponse.json());
 })();
