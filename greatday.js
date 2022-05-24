@@ -18,6 +18,11 @@ function sortKeys(Pe, ie = !1) {
   );
 }
 
+function datePlusDays(date, days) {
+  date.setDate(date.getDate() + days);
+  return date;
+}
+
 /**
  * All codes below are tested only for app.greatdayhr.com <- PH Hexaware.
  */
@@ -25,6 +30,8 @@ export const ENDPOINT_LOGIN = "https://apigonbcv2c3.dataon.com/auth/login?";
 export const ENDPOINT_LOGOUT = "https://apigonbcv2c3.dataon.com/auth/logout?";
 export const ENDPOINT_SUPERVISOR =
   "https://apigonbcv2c3.dataon.com/homeFeed/getSupervisor?";
+export const ENDPOINT_ATTENDANCE =
+  "https://apigonbcv2c3.dataon.com/att/shared/attendance/getAttendanceList?";
 
 function loginPayload(username, password) {
   const salt = "5unf15h" + username + "D4740N";
@@ -63,7 +70,7 @@ function loginPayload(username, password) {
 
 export class Greatday {
   constructor() {
-    this.authorization = "";
+    this.profile = {};
   }
 
   _payloadHash(payload) {
@@ -81,6 +88,14 @@ export class Greatday {
     };
   }
 
+  get authorization() {
+    return this.profile["id"];
+  }
+
+  get employeeId() {
+    return this.profile["empId"];
+  }
+
   async login(username, password) {
     console.debug("logging in...");
     const payload = loginPayload(username, password);
@@ -89,8 +104,7 @@ export class Greatday {
       body: JSON.stringify(payload),
       headers: this._headers(payload),
     });
-    const auth = await response.json();
-    this.authorization = auth["id"];
+    this.profile = await response.json();
   }
 
   async logout() {
@@ -99,7 +113,7 @@ export class Greatday {
       method: "POST",
       headers: this._headers(),
     });
-    this.authorization = "";
+    this.profile = {};
   }
 
   async req(endpoint, payload = null, method = "GET") {
@@ -109,5 +123,42 @@ export class Greatday {
       body: payload ? JSON.stringify(payload) : null,
     });
     return await response.json();
+  }
+
+  async attendanceList(options = {}) {
+    options.limit = options.limit || 20;
+    options.skip = options.skip || 0;
+    options.overridePayload = options.overridePayload || {};
+    options.endDate =
+      options.endDate ||
+      datePlusDays(new Date(), -options.limit * options.skip).toISOString();
+    options.startDate =
+      options.startDate ||
+      datePlusDays(new Date(options.endDate), -options.limit).toISOString();
+
+    const payload = {
+      empId: "",
+      empIds: [this.employeeId],
+      status: [],
+      startDate: options.startDate,
+      endDate: options.endDate,
+      txtName: "",
+      worklocationCodes: [],
+      minRecogTreshold: 0,
+      maxRecogTreshold: 100,
+      noRecog: true,
+      minLivenessTreshold: 0,
+      maxLivenessTreshold: 100,
+      noLiveness: true,
+      noGps: true,
+      noPicture: true,
+      ...options.overridePayload,
+    };
+
+    return await this.req(
+      `${ENDPOINT_ATTENDANCE}?limit=${options.limit}&skip=${options.skip}`,
+      payload,
+      "POST"
+    );
   }
 }
