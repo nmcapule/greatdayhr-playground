@@ -137,7 +137,6 @@ export class Greatday {
       datePlusDays(new Date(options.endDate), -options.limit).toISOString();
 
     const payload = {
-      empId: "",
       empIds: [this.employeeId],
       status: [],
       startDate: options.startDate,

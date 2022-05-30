@@ -19,15 +19,12 @@ function extractTime(isodate) {
   // console.log(supervisor);
 
   // Note: Only up to 20 entries :P
-  const attendances = await client.attendanceList({
-    startDate: new Date("2022-01-01"),
-    endDate: new Date("2022-01-20"),
-  });
+  const attendances = await client.attendanceList({});
 
   const errorDates = [];
 
   for (const att of attendances.data) {
-    if (!att.productivehours || att.otherStatus.includes("HLDY")) {
+    if (!att.productivehours || att.otherStatus.includes("HLDY") || att.otherStatus.includes("VL")) {
       att.shiftstarttime = null;
       att.shiftendtime = null;
     }
