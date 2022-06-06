@@ -1,6 +1,8 @@
 import "dotenv/config";
 import colors from "colors";
 import { Greatday, ENDPOINT_SUPERVISOR } from "./greatday.js";
+import fs from "fs";
+import ps from "prompt-sync";
 
 function formatWeirdDDMMYYYY(input) {
   return `${input.slice(6, 10)}-${input.slice(3, 5)}-${input.slice(0, 2)}`;
@@ -12,6 +14,24 @@ function extractTime(isodate) {
 }
 
 (async () => {
+  if (!fs.existsSync("./.env")) {
+    console.log(
+      "The .env does not exist in the current directory. Setting it up."
+    );
+    const prompt = ps();
+    const username = prompt("Your GreatdayHR username? ");
+    const password = prompt.hide("Your GreatdayHR password (hidden)? ");
+    fs.writeFileSync(
+      "./.env",
+      `\
+GDHR_USER=${username}
+GDHR_PASS=${password}
+`
+    );
+    process.env.GDHR_USER = username;
+    process.env.GDHR_PASS = password;
+  }
+
   const client = new Greatday();
   await client.login(process.env.GDHR_USER, process.env.GDHR_PASS);
 
@@ -21,10 +41,12 @@ function extractTime(isodate) {
   // Note: Only up to 20 entries :P
   const attendances = await client.attendanceList({});
 
-  const errorDates = [];
-
   for (const att of attendances.data) {
-    if (!att.productivehours || att.otherStatus.includes("HLDY") || att.otherStatus.includes("VL")) {
+    if (
+      !att.productivehours ||
+      att.otherStatus.includes("HLDY") ||
+      att.otherStatus.includes("VL")
+    ) {
       att.shiftstarttime = null;
       att.shiftendtime = null;
     }

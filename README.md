@@ -38,3 +38,9 @@ Create a .env file with contents of your username and password.
 GDHR_USER=ME0101
 GDHR_PASS=mypasswold
 ```
+
+## Building
+
+```sh
+$ npx caxa -i . -o gd -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/main.js"
+```

@@ -12,6 +12,10 @@
   "dependencies": {
     "colors": "^1.4.0",
     "dotenv": "^16.0.1",
-    "node-fetch": "^3.2.4"
+    "node-fetch": "^3.2.4",
+    "prompt-sync": "^4.2.0"
+  },
+  "devDependencies": {
+    "nexe": "^4.0.0-rc.1"
   }
 }
