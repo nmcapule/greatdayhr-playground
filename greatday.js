@@ -136,7 +136,10 @@ export class Greatday {
     options.overridePayload = options.overridePayload || {};
     options.endDate =
       options.endDate ||
-      datePlusDays(new Date(), -options.limit * options.skip).toISOString();
+      datePlusDays(
+        new Date(),
+        -options.limit * options.skip + -options.daysAgo
+      ).toISOString();
     options.startDate =
       options.startDate ||
       datePlusDays(new Date(options.endDate), -options.limit).toISOString();

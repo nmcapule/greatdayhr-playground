@@ -3,6 +3,7 @@ import colors from "colors";
 import { Greatday, ENDPOINT_SUPERVISOR } from "./greatday.js";
 import fs from "fs";
 import ps from "prompt-sync";
+import { Command } from "commander";
 
 function formatWeirdDDMMYYYY(input) {
   return `${input.slice(6, 10)}-${input.slice(3, 5)}-${input.slice(0, 2)}`;
@@ -13,7 +14,7 @@ function extractTime(isodate) {
   return isodate?.slice(11, 16);
 }
 
-(async () => {
+async function main(options) {
   let username, password;
   if (!fs.existsSync("./.env")) {
     console.log(
@@ -47,7 +48,7 @@ GDHR_PASS=${Buffer.from(password).toString("base64")}
   // console.log(supervisor);
 
   // Note: Only up to 20 entries :P
-  const attendances = await client.attendanceList({});
+  const attendances = await client.attendanceList(options);
 
   for (const att of attendances.data) {
     if (
@@ -82,4 +83,20 @@ GDHR_PASS=${Buffer.from(password).toString("base64")}
   }
 
   await client.logout();
-})();
+}
+
+const program = new Command();
+program
+  .name("gd")
+  .description(
+    "Quickly peek on your latest GreatdayHR schedules and attendances."
+  )
+  .version("0.0.1");
+
+program
+  .option("-s, --start-date <value>", "attendances to retrieve from date", null)
+  .option("-e, --end-date <value>", "attendances to retrieve until date", null)
+  .option("-a, --days-ago <value>", "attendances until days ago", null)
+  .action(main);
+
+program.parse();
