@@ -5,7 +5,18 @@ An attempt to reverse engineer the APIs from app.greatdayhr.com, but only workin
 Currently, it only displays your schedule and highlights which ones you are marked absent as.
 
 ```s
-[nix-shell:~/stuff/dataon]$ node main.js
+$ ./gd --help
+Usage: gd [options]
+
+Quickly peek on your latest GreatdayHR schedules and attendances.
+
+Options:
+  -V, --version             output the version number
+  -s, --start-date <value>  attendances to retrieve from date (default: null)
+  -e, --end-date <value>    attendances to retrieve until date (default: null)
+  -a, --days-ago <value>    attendances until days ago (default: null)
+  -h, --help                display help for command
+$ ./gd
 logging in...
 > 2022-01-20  14:53/14:53 to 22:58/22:53 OTREG,PRS
 > 2022-01-19  14:50/14:50 to 23:00/22:50 OTREG,PRS

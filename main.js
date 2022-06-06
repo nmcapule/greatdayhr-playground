@@ -5,6 +5,8 @@ import fs from "fs";
 import ps from "prompt-sync";
 import { Command } from "commander";
 
+const ENV_FILE = "./.env";
+
 function formatWeirdDDMMYYYY(input) {
   return `${input.slice(6, 10)}-${input.slice(3, 5)}-${input.slice(0, 2)}`;
 }
@@ -16,7 +18,7 @@ function extractTime(isodate) {
 
 async function main(options) {
   let username, password;
-  if (!fs.existsSync("./.env")) {
+  if (!fs.existsSync(ENV_FILE)) {
     console.log(
       "The .env does not exist in the current directory. Setting it up."
     );
@@ -24,7 +26,7 @@ async function main(options) {
     username = prompt("Your GreatdayHR username? ");
     password = prompt.hide("Your GreatdayHR password (hidden)? ");
     fs.writeFileSync(
-      "./.env",
+      ENV_FILE,
       `\
 GDHR_USER=${username}
 GDHR_PASS=${Buffer.from(password).toString("base64")}
@@ -41,6 +43,7 @@ GDHR_PASS=${Buffer.from(password).toString("base64")}
     await client.login(username, password);
   } catch (e) {
     console.error(colors.red.bold(e));
+    fs.unlinkSync(ENV_FILE);
     return;
   }
 
