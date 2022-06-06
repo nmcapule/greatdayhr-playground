@@ -14,26 +14,34 @@ function extractTime(isodate) {
 }
 
 (async () => {
+  let username, password;
   if (!fs.existsSync("./.env")) {
     console.log(
       "The .env does not exist in the current directory. Setting it up."
     );
     const prompt = ps();
-    const username = prompt("Your GreatdayHR username? ");
-    const password = prompt.hide("Your GreatdayHR password (hidden)? ");
+    username = prompt("Your GreatdayHR username? ");
+    password = prompt.hide("Your GreatdayHR password (hidden)? ");
     fs.writeFileSync(
       "./.env",
       `\
 GDHR_USER=${username}
-GDHR_PASS=${password}
+GDHR_PASS=${Buffer.from(password).toString("base64")}
 `
     );
-    process.env.GDHR_USER = username;
-    process.env.GDHR_PASS = password;
+  } else {
+    username = process.env.GDHR_USER;
+    password = Buffer.from(process.env.GDHR_PASS, "base64").toString("ascii");
   }
 
   const client = new Greatday();
-  await client.login(process.env.GDHR_USER, process.env.GDHR_PASS);
+
+  try {
+    await client.login(username, password);
+  } catch (e) {
+    console.error(colors.red.bold(e));
+    return;
+  }
 
   // const supervisor = await client.req(ENDPOINT_SUPERVISOR);
   // console.log(supervisor);

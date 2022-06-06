@@ -104,6 +104,11 @@ export class Greatday {
       body: JSON.stringify(payload),
       headers: this._headers(payload),
     });
+
+    if (response.status >= 400) {
+      throw `Server threw: ${response.statusText}. Maybe wrong password?`;
+    }
+
     this.profile = await response.json();
   }
 
